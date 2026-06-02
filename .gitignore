@@ -1,0 +1,93 @@
+# =========================
+# Dependencies
+# =========================
+node_modules/
+
+# =========================
+# Environment Variables
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# Logs
+# =========================
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# =========================
+# Build Outputs
+# =========================
+dist/
+build/
+.next/
+out/
+coverage/
+
+# =========================
+# Expo / React Native
+# =========================
+.expo/
+.expo-shared/
+web-build/
+
+# Native folders (if generated)
+android/
+ios/
+
+# Metro
+.metro-health-check*
+
+# =========================
+# Vite
+# =========================
+vite.svg
+
+# =========================
+# NestJS
+# =========================
+apps/backend/dist/
+apps/backend/coverage/
+
+# =========================
+# Prisma
+# =========================
+prisma/dev.db
+prisma/dev.db-journal
+
+# =========================
+# Cache
+# =========================
+.cache/
+.parcel-cache/
+.turbo/
+
+# =========================
+# IDE
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# OS
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Temporary
+# =========================
+tmp/
+temp/
+
+# =========================
+# Misc
+# =========================
+*.pem
+*.key
+*.crt
