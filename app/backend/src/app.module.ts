@@ -3,9 +3,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { FirebaseModule } from './firebase/firebase.module';
 import { TestController } from './test/test.controller';
+import { AiModule } from './ai/ai.module';
 
 @Module({
-  imports: [FirebaseModule],
+  imports: [FirebaseModule, AiModule],
   controllers: [AppController, TestController],
   providers: [AppService],
 })
