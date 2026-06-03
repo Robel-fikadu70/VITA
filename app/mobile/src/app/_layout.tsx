@@ -1,15 +1,22 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import { useColorScheme } from 'react-native';
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+import { UserProfileProvider } from '@/context/user-profile-context';
+import { ToastProvider } from '@/components/vita/toast';
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+export default function RootLayout() {
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    <UserProfileProvider>
+      <ToastProvider>
+        <StatusBar style="light" />
+        <Stack screenOptions={{ headerShown: false, animation: 'fade' }}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="login" options={{ animation: 'fade' }} />
+          <Stack.Screen name="profile-setup" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="onboarding-consent" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
+        </Stack>
+      </ToastProvider>
+    </UserProfileProvider>
   );
 }
