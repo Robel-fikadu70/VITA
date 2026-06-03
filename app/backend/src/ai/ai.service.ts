@@ -11,11 +11,13 @@ export class AiService {
     private config: ConfigService,
     private firebase: FirebaseService,
   ) {
+    const key = this.config.get<string>('GEMINI_API_KEY');
+    console.log('Gemini Key Detected:', key ? 'YES (Starts with ' + key.substring(0, 5) + ')' : 'NO');
     this.genAI = new GoogleGenerativeAI(this.config.get('GEMINI_API_KEY'));
   }
 
   async generateWellnessReport(userId: string, allData: any) {
-    const model = this.genAI.getGenerativeModel({ model: 'gemini-pro' });
+    const model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     const db = this.firebase.getFirestore();
 
     const prompt = `
@@ -33,9 +35,9 @@ export class AiService {
 
     try {
       const result = await model.generateContent(prompt);
-      const aiResponse = JSON.parse(
-        result.response.text().replace(/```json|```/g, ''),
-      );
+      const rawText = result.response.text();
+      const cleanJson = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+      const aiResponse = JSON.parse(cleanJson);
 
       // MATCHING: Find a partner service for the category
       const serviceSnap = await db

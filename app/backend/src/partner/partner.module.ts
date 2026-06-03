@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common';
-import { AiService } from './ai.service';
+import { PartnerController } from './partner.controller';
 import { FirebaseModule } from 'src/firebase/firebase.module';
 
 @Module({
   imports: [FirebaseModule],
-  providers: [AiService],
-  exports: [AiService],
+  controllers: [PartnerController]
 })
-export class AiModule {}
+export class PartnerModule {}

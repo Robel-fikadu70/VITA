@@ -3,7 +3,7 @@ import { AiService } from '../ai/ai.service';
 import { FirebaseService } from '../firebase/firebase.service';
 
 @Controller('wellness')
-export class WellnessController {
+export class PulseController {
   constructor(
     private ai: AiService,
     private firebase: FirebaseService,
