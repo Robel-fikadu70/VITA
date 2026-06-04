@@ -6,39 +6,39 @@ import * as path from 'path';
 export class FirebaseService implements OnModuleInit {
   private db: admin.firestore.Firestore;
 
-  // firebase.service.ts
-onModuleInit() {
-  let serviceAccount: admin.ServiceAccount;
+  onModuleInit() {
+    let credential: admin.ServiceAccount;
 
-  if (process.env.FIREBASE_PRIVATE_KEY) {
-    // 1. Get the key from env
-    let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+    if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+      const serviceAccount = JSON.parse(
+        process.env.FIREBASE_SERVICE_ACCOUNT_JSON,
+      );
 
-    // 2. Remove surrounding quotes if they exist (common Render issue)
-    if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
-      privateKey = privateKey.substring(1, privateKey.length - 1);
+      credential = {
+        projectId: serviceAccount.project_id,
+        clientEmail: serviceAccount.client_email,
+        privateKey: serviceAccount.private_key.replace(/\\n/g, '\n'),
+      };
+    } else {
+      const localServiceAccount = require(
+        path.resolve('./firebase-adminsdk.json'),
+      );
+
+      credential = {
+        projectId: localServiceAccount.project_id,
+        clientEmail: localServiceAccount.client_email,
+        privateKey: localServiceAccount.private_key,
+      };
     }
 
-    // 3. Fix the escaped newlines
-    privateKey = privateKey.replace(/\\n/g, '\n');
+    if (admin.apps.length === 0) {
+      admin.initializeApp({
+        credential: admin.credential.cert(credential),
+      });
+    }
 
-    serviceAccount = {
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: privateKey,
-    };
-  } else {
-    // Local development fallback
-    serviceAccount = require(path.resolve('./firebase-adminsdk.json'));
+    this.db = admin.firestore();
   }
-
-  if (admin.apps.length === 0) {
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-    });
-  }
-  this.db = admin.firestore();
-}
 
   getFirestore() {
     return this.db;
