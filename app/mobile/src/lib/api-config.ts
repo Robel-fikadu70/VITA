@@ -1,15 +1,16 @@
 import { Platform } from 'react-native';
 
 const DEFAULT_PORT = 3000;
+const backend_URL = process.env.EXPO_PUBLIC_API_URL;
 
 /**
  * Resolves the backend base URL.
  * Automatically handles Android emulator loopback (10.0.2.2) vs. iOS/Web localhost,
  * and allows overriding via environment variables.
  */
-const getLocalBaseUrl = (): string => {
+const getLocalBaseUrl = (): any => {
   if (Platform.OS === 'android') {
-    return `http://192.168.1.4:${DEFAULT_PORT}`;
+    return backend_URL;
   }
   return `http://localhost:${DEFAULT_PORT}`;
 };
