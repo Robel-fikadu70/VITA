@@ -2,23 +2,44 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, FadeInLeft } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BOTTOM_NAV_BAR_HEIGHT } from '@/components/vita/bottom-nav';
 import { getUserProfile } from '@/lib/onboarding-storage';
+import { apiClient, getActiveUserId } from '@/lib/api-client';
 
 const TEXT = '#D8F3DC';
 const TEXT_MUTED = 'rgba(216,243,220,0.5)';
 const TEXT_SOFT = 'rgba(216,243,220,0.82)';
 const GREEN = '#52B788';
 
-const PROTOCOL = [
+const DEFAULT_PROTOCOL = [
   { id: 'walk', icon: 'walk-outline' as const, text: '20-Minute Walk', color: '#52B788' },
   { id: 'water', icon: 'water-outline' as const, text: 'Drink 2 Liters of Water', color: '#74C0FC' },
   { id: 'screen', icon: 'tv-outline' as const, text: 'No Screens After 10 PM', color: '#F4A261' },
 ];
+
+const getProtocolIconAndColor = (text: string) => {
+  const t = text.toLowerCase();
+  if (t.includes('walk') || t.includes('stretch') || t.includes('exercise') || t.includes('yoga') || t.includes('movement')) {
+    return { icon: 'walk-outline' as const, color: '#52B788' };
+  }
+  if (t.includes('water') || t.includes('drink') || t.includes('hydrate') || t.includes('nutrition') || t.includes('fasting')) {
+    return { icon: 'water-outline' as const, color: '#74C0FC' };
+  }
+  if (t.includes('screen') || t.includes('phone') || t.includes('device') || t.includes('tv') || t.includes('sleep') || t.includes('bed')) {
+    return { icon: 'moon-outline' as const, color: '#F4A261' };
+  }
+  return { icon: 'leaf-outline' as const, color: '#52B788' };
+};
+
+const formatPrice = (val: any): string => {
+  if (val === undefined || val === null) return '';
+  const s = String(val);
+  return s.toUpperCase().includes('ETB') ? s : `${s} ETB`;
+};
 
 export function HomeScreen() {
   const insets = useSafeAreaInsets();
@@ -26,6 +47,23 @@ export function HomeScreen() {
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [displayName, setDisplayName] = useState('Abel Tesfaye');
   const [avatarLetter, setAvatarLetter] = useState('A');
+  const [report, setReport] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchDashboard = useCallback(async () => {
+    try {
+      setLoading(true);
+      const userId = await getActiveUserId();
+      const data = await apiClient.get<any>(`/wellness/dashboard/${userId}`);
+      if (data && !data.message) {
+        setReport(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch dashboard data:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     getUserProfile().then((profile) => {
@@ -37,11 +75,41 @@ export function HomeScreen() {
         setAvatarLetter(profile.username.charAt(0).toUpperCase());
       }
     });
-  }, []);
+    fetchDashboard();
+  }, [fetchDashboard]);
 
   const toggleProtocol = useCallback((id: string) => {
     setChecked((prev) => ({ ...prev, [id]: !prev[id] }));
   }, []);
+
+  // Determine recovery score and concerns
+  const score = report?.score ?? 68;
+  const concernsText = report?.concerns && report.concerns.length > 0
+    ? report.concerns.join(' · ')
+    : 'Your sleep quality has dropped over the last 3 days and screen time increased significantly.';
+
+  // Map active recommended booking service
+  const hasCTA = !!report?.bookingCTA;
+  const cta = report?.bookingCTA || {
+    id: 'tulsi-yoga',
+    name: 'Tulsi Yoga',
+    type: 'Restorative Yoga Session',
+    emoji: '🧘',
+    price: '500 ETB',
+    discount: '425 ETB',
+    discountLabel: '15% Wellness Discount',
+    rating: '4.9',
+    reviews: '218',
+    distance: '0.8 km'
+  };
+
+  // Map dynamic protocols
+  const protocols = report?.homeProtocols && report.homeProtocols.length > 0
+    ? report.homeProtocols.map((text: string, i: number) => {
+        const { icon, color } = getProtocolIconAndColor(text);
+        return { id: `protocol-${i}`, icon, text, color };
+      })
+    : DEFAULT_PROTOCOL;
 
   return (
     <LinearGradient
@@ -86,15 +154,24 @@ export function HomeScreen() {
                 <View style={styles.recoveryCopy}>
                   <View style={styles.recoveryBadge}>
                     <Text style={styles.recoveryBadgeIcon}>⚠</Text>
-                    <Text style={styles.recoveryBadgeText}>RECOVERY NEEDED</Text>
+                    <Text style={styles.recoveryBadgeText}>
+                      {score < 70 ? 'RECOVERY NEEDED' : 'WELLNESS CHECK'}
+                    </Text>
                   </View>
-                  <Text style={styles.recoveryBody}>
-                    Your sleep quality has dropped over the last 3 days and screen time increased
-                    significantly.
-                  </Text>
+                  {loading ? (
+                    <ActivityIndicator color={GREEN} style={{ alignSelf: 'flex-start', marginTop: 4 }} />
+                  ) : (
+                    <Text style={styles.recoveryBody}>{concernsText}</Text>
+                  )}
                 </View>
                 <View style={styles.scoreBlock}>
-                  <Text style={styles.scoreValue}>68</Text>
+                  {loading ? (
+                    <ActivityIndicator color="#F4A261" />
+                  ) : (
+                    <Text style={[styles.scoreValue, { color: score < 50 ? '#FF6B6B' : score < 75 ? '#F4A261' : '#52B788' }]}>
+                      {score}
+                    </Text>
+                  )}
                   <Text style={styles.scoreDenom}>/100</Text>
                   <Text style={styles.scoreLabel}>Score</Text>
                 </View>
@@ -103,23 +180,27 @@ export function HomeScreen() {
           </Pressable>
 
           <Animated.View entering={FadeInDown.delay(220).springify()} style={styles.heroCard}>
-            <Text style={styles.sectionEyebrow}>Today&apos;s Recommendation</Text>
+            <Text style={styles.sectionEyebrow}>
+              {hasCTA ? 'AI Recommended Booking' : 'Today\'s Recommendation'}
+            </Text>
             <View style={styles.providerRow}>
               <LinearGradient
                 colors={['#2D6A4F', '#52B788']}
                 style={styles.providerAvatar}>
-                <Text style={styles.providerEmoji}>🧘</Text>
+                <Text style={styles.providerEmoji}>{cta.emoji || '🧘'}</Text>
               </LinearGradient>
               <View style={styles.providerInfo}>
                 <View style={styles.providerTitleRow}>
-                  <Text style={styles.providerName}>Tulsi Yoga</Text>
+                  <Text style={styles.providerName}>{cta.name}</Text>
                   <View style={styles.stars}>
                     {[1, 2, 3, 4, 5].map((i) => (
                       <Ionicons key={i} name="star" size={10} color="#D4AF37" />
                     ))}
                   </View>
                 </View>
-                <Text style={styles.sessionName}>Restorative Yoga Session</Text>
+                <Text style={styles.sessionName}>
+                  {cta.type || cta.sessionName || `${cta.category || 'Wellness'} Session`}
+                </Text>
                 <View style={styles.metaRow}>
                   <View style={styles.metaItem}>
                     <Ionicons name="time-outline" size={11} color={TEXT_MUTED} />
@@ -127,7 +208,7 @@ export function HomeScreen() {
                   </View>
                   <View style={styles.metaItem}>
                     <Ionicons name="location-outline" size={11} color={TEXT_MUTED} />
-                    <Text style={styles.metaText}>0.8 km away</Text>
+                    <Text style={styles.metaText}>{cta.distance || '0.8 km'} away</Text>
                   </View>
                 </View>
               </View>
@@ -136,18 +217,31 @@ export function HomeScreen() {
             <View style={styles.priceRow}>
               <View style={styles.discountBadge}>
                 <Text style={styles.discountEmoji}>🏷</Text>
-                <Text style={styles.discountText}>15% Wellness Discount</Text>
+                <Text style={styles.discountText}>
+                  {cta.discountLabel || '15% Wellness Discount'}
+                </Text>
               </View>
               <View style={styles.priceBlock}>
-                <Text style={styles.priceOld}>500 ETB</Text>
-                <Text style={styles.priceNew}>425 ETB</Text>
+                {cta.price && (
+                  <Text style={styles.priceOld}>
+                    {formatPrice(cta.price)}
+                  </Text>
+                )}
+                <Text style={styles.priceNew}>
+                  {formatPrice(cta.discount || cta.price)}
+                </Text>
               </View>
             </View>
 
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Book Now"
-              onPress={() => router.push('/(tabs)/provider')}
+              onPress={() =>
+                router.push({
+                  pathname: '/(tabs)/provider',
+                  params: { id: cta.id },
+                })
+              }
               style={({ pressed }) => [pressed && styles.pressed]}>
               <LinearGradient
                 colors={['#1B4332', '#2D6A4F', '#52B788']}
@@ -163,30 +257,34 @@ export function HomeScreen() {
 
           <Animated.View entering={FadeInDown.delay(350).springify()} style={styles.protocolCard}>
             <Text style={styles.protocolEyebrow}>Or Try At Home Tonight</Text>
-            {PROTOCOL.map((item, index) => {
-              const isChecked = !!checked[item.id];
-              return (
-                <Animated.View
-                  key={item.id}
-                  entering={FadeInLeft.delay(450 + index * 80).duration(300)}
-                  style={[styles.protocolRow, index < 2 && styles.protocolRowGap]}>
-                  <View style={[styles.protocolIcon, { backgroundColor: `${item.color}18`, borderColor: `${item.color}30` }]}>
-                    <Ionicons name={item.icon} size={18} color={item.color} />
-                  </View>
-                  <Text style={styles.protocolText}>{item.text}</Text>
-                  <Pressable
-                    accessibilityRole="checkbox"
-                    accessibilityState={{ checked: isChecked }}
-                    onPress={() => toggleProtocol(item.id)}
-                    style={[
-                      styles.checkBox,
-                      isChecked && styles.checkBoxChecked,
-                    ]}>
-                    {isChecked ? <Ionicons name="checkmark" size={12} color={GREEN} /> : null}
-                  </Pressable>
-                </Animated.View>
-              );
-            })}
+            {loading ? (
+              <ActivityIndicator color={GREEN} style={{ marginVertical: 12 }} />
+            ) : (
+              protocols.map((item: any, index: number) => {
+                const isChecked = !!checked[item.id];
+                return (
+                  <Animated.View
+                    key={item.id}
+                    entering={FadeInLeft.delay(450 + index * 80).duration(300)}
+                    style={[styles.protocolRow, index < protocols.length - 1 && styles.protocolRowGap]}>
+                    <View style={[styles.protocolIcon, { backgroundColor: `${item.color}18`, borderColor: `${item.color}30` }]}>
+                      <Ionicons name={item.icon} size={18} color={item.color} />
+                    </View>
+                    <Text style={styles.protocolText}>{item.text}</Text>
+                    <Pressable
+                      accessibilityRole="checkbox"
+                      accessibilityState={{ checked: isChecked }}
+                      onPress={() => toggleProtocol(item.id)}
+                      style={[
+                        styles.checkBox,
+                        isChecked && styles.checkBoxChecked,
+                      ]}>
+                      {isChecked ? <Ionicons name="checkmark" size={12} color={GREEN} /> : null}
+                    </Pressable>
+                  </Animated.View>
+                );
+              })
+            )}
           </Animated.View>
 
           <Animated.View entering={FadeIn.delay(550)}>

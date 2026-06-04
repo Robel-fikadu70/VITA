@@ -1,33 +1,72 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, FadeInLeft, FadeInUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ScoreRing } from '@/components/vita/score-ring';
 import { BOTTOM_NAV_BAR_HEIGHT } from '@/components/vita/bottom-nav';
+import { apiClient, getActiveUserId } from '@/lib/api-client';
 
 const TEXT = '#D8F3DC';
 const TEXT_MUTED = 'rgba(216,243,220,0.55)';
 const GREEN = '#52B788';
 const ORANGE = '#F4A261';
 
-const STRONG = ['Consistent Activity', 'Good Hydration'];
-const IMPROVE = ['Excessive Night Screen Time', 'Inconsistent Sleep'];
+const DEFAULT_STRONG = ['Consistent Activity', 'Good Hydration'];
+const DEFAULT_IMPROVE = ['Excessive Night Screen Time', 'Inconsistent Sleep'];
 
 type WellnessReportScreenProps = {
   score?: number;
   showBackButton?: boolean;
 };
 
-export function WellnessReportScreen({ score = 72, showBackButton = false }: WellnessReportScreenProps) {
+export function WellnessReportScreen({ score: initialScore = 72, showBackButton = false }: WellnessReportScreenProps) {
   const insets = useSafeAreaInsets();
   const bottomPad = insets.bottom + BOTTOM_NAV_BAR_HEIGHT + 28;
+  const [report, setReport] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchReport = async () => {
+      try {
+        setLoading(true);
+        const userId = await getActiveUserId();
+        const data = await apiClient.get<any>(`/wellness/dashboard/${userId}`);
+        if (data && !data.message) {
+          setReport(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch wellness report:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchReport();
+  }, []);
 
   const handleViewPrescription = () => {
     router.push('/(tabs)/rx-details');
   };
+
+  const activeScore = report?.score ?? initialScore;
+
+  // Dynamic content based on score
+  const isOptimal = activeScore >= 80;
+  const isModerate = activeScore >= 60 && activeScore < 80;
+  
+  const attentionLabel = isOptimal ? '✦ Optimal Recovery' : isModerate ? '⚠ Needs Attention' : '⚠ High Stress Alert';
+  const attentionColor = isOptimal ? GREEN : ORANGE;
+  const recoveryText = isOptimal
+    ? 'Your score is within the optimal zone. Energy reserves are high.'
+    : isModerate
+    ? 'Your score is below your personal baseline. Recovery recommended.'
+    : 'Significant stress markers detected. Prioritize immediate rest and home protocols.';
+
+  const strongAreas = activeScore >= 70 ? DEFAULT_STRONG : ['Mindful Presence', 'Baseline Activity Sync'];
+  const improvementAreas = report?.concerns && report.concerns.length > 0 ? report.concerns : DEFAULT_IMPROVE;
 
   return (
     <LinearGradient colors={['#071A0F', '#1B4332', '#0A200F']} locations={[0, 0.6, 1]} style={styles.root}>
@@ -54,40 +93,54 @@ export function WellnessReportScreen({ score = 72, showBackButton = false }: Wel
         </Animated.View>
 
         <Animated.View entering={FadeIn.delay(150).springify()} style={styles.scoreCard}>
-          <ScoreRing score={score} />
-          <View style={styles.scoreCopy}>
-            <Text style={styles.scoreEyebrow}>Recovery Score</Text>
-            <View style={styles.attentionBadge}>
-              <Text style={styles.attentionText}>⚠ Needs Attention</Text>
-            </View>
-            <Text style={styles.scoreBody}>
-              Your score is below your personal baseline. Recovery recommended.
-            </Text>
-          </View>
+          {loading ? (
+            <ActivityIndicator size="large" color={GREEN} style={{ padding: 40 }} />
+          ) : (
+            <>
+              <ScoreRing score={activeScore} />
+              <View style={styles.scoreCopy}>
+                <Text style={styles.scoreEyebrow}>Recovery Score</Text>
+                <View style={[styles.attentionBadge, { borderColor: `${attentionColor}35`, backgroundColor: `${attentionColor}18` }]}>
+                  <Text style={[styles.attentionText, { color: attentionColor }]}>{attentionLabel}</Text>
+                </View>
+                <Text style={styles.scoreBody}>
+                  {recoveryText}
+                </Text>
+              </View>
+            </>
+          )}
         </Animated.View>
 
         <Animated.View entering={FadeInLeft.delay(300)} style={styles.strongCard}>
           <Text style={styles.strongTitle}>✦ Strong Areas</Text>
-          {STRONG.map((item) => (
-            <View key={item} style={styles.listRow}>
-              <View style={styles.strongIcon}>
-                <Ionicons name="checkmark" size={13} color={GREEN} />
+          {loading ? (
+            <ActivityIndicator color={GREEN} style={{ paddingVertical: 10 }} />
+          ) : (
+            strongAreas.map((item: string) => (
+              <View key={item} style={styles.listRow}>
+                <View style={styles.strongIcon}>
+                  <Ionicons name="checkmark" size={13} color={GREEN} />
+                </View>
+                <Text style={styles.listText}>{item}</Text>
               </View>
-              <Text style={styles.listText}>{item}</Text>
-            </View>
-          ))}
+            ))
+          )}
         </Animated.View>
 
         <Animated.View entering={FadeInLeft.delay(420)} style={styles.improveCard}>
           <Text style={styles.improveTitle}>⚠ Improvement Areas</Text>
-          {IMPROVE.map((item) => (
-            <View key={item} style={styles.listRow}>
-              <View style={styles.improveIcon}>
-                <Ionicons name="warning-outline" size={13} color={ORANGE} />
+          {loading ? (
+            <ActivityIndicator color={ORANGE} style={{ paddingVertical: 10 }} />
+          ) : (
+            improvementAreas.map((item: string) => (
+              <View key={item} style={styles.listRow}>
+                <View style={styles.improveIcon}>
+                  <Ionicons name="warning-outline" size={13} color={ORANGE} />
+                </View>
+                <Text style={styles.listText}>{item}</Text>
               </View>
-              <Text style={styles.listText}>{item}</Text>
-            </View>
-          ))}
+            ))
+          )}
         </Animated.View>
 
         <Animated.View entering={FadeInUp.delay(600)}>
