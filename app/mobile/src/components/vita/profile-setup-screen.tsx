@@ -197,7 +197,7 @@ export function ProfileSetupScreen({ onContinue }: ProfileSetupScreenProps) {
                           onPress={() => updateProfile({ gender: g })}
                           style={[styles.genderChip, selected && styles.genderChipSelected]}>
                           <Text style={[styles.genderChipText, selected && styles.genderChipTextSelected]}>
-                            {g === 'Prefer not to say' ? 'Other' : g}
+                            {g}
                           </Text>
                         </Pressable>
                       );
