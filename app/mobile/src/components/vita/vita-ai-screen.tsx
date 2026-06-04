@@ -26,6 +26,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BOTTOM_NAV_BAR_HEIGHT } from '@/components/vita/bottom-nav';
 import { MeshGradientBackground } from '@/components/vita/mesh-gradient-background';
+import { apiClient, getActiveUserId } from '@/lib/api-client';
 
 const TEXT = '#111111';
 const TEXT_MUTED = 'rgba(17,17,17,0.6)';
@@ -46,9 +47,6 @@ const LOADING_STEPS = [
   'Checking activity patterns...',
   'Generating recommendations...',
 ];
-
-const DEFAULT_RESPONSE =
-  'Based on your recent activity patterns and sleep data, I recommend focusing on sleep hygiene. Your recovery score of 72 indicates moderate stress. Try reducing screen time after 10 PM and incorporating 20 minutes of light stretching before bed.';
 
 function LoadingOrb() {
   const scale = useSharedValue(1);
@@ -105,7 +103,7 @@ export function VitaAiScreen() {
 
   useEffect(() => clearTimers, [clearTimers]);
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback(async () => {
     if (!query.trim() || isLoading) return;
 
     clearTimers();
@@ -113,18 +111,30 @@ export function VitaAiScreen() {
     setResponse(null);
     setCurrentStep(0);
 
+    // Animate loader steps
     let step = 0;
     intervalRef.current = setInterval(() => {
-      setCurrentStep(step);
       step += 1;
-      if (step >= LOADING_STEPS.length) {
-        clearTimers();
-        timeoutRef.current = setTimeout(() => {
-          setIsLoading(false);
-          setResponse(DEFAULT_RESPONSE);
-        }, 500);
+      if (step < LOADING_STEPS.length) {
+        setCurrentStep(step);
       }
-    }, 1000);
+    }, 700);
+
+    try {
+      const userId = await getActiveUserId();
+      const res = await apiClient.post<{ response: string }>('/wellness/chat', {
+        userId,
+        message: query.trim(),
+      });
+      clearTimers();
+      setIsLoading(false);
+      setResponse(res.response || 'Sorry, I couldn\'t process that question.');
+    } catch (err) {
+      console.error('AI chat failed:', err);
+      clearTimers();
+      setIsLoading(false);
+      setResponse('Failed to connect to VITAL-ETHIO server. Please check your backend connection.');
+    }
   }, [clearTimers, isLoading, query]);
 
   const showExamples = !isLoading && !response;

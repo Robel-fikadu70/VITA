@@ -18,6 +18,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useUserProfile } from '@/context/user-profile-context';
 import type { Gender } from '@/types/user-profile';
 import { useToast } from '@/components/vita/toast';
+import { apiClient, getActiveUserId } from '@/lib/api-client';
+import { setLoggedIn } from '@/lib/auth-storage';
 
 const TEXT = '#D8F3DC';
 const TEXT_MUTED = 'rgba(216,243,220,0.55)';
@@ -77,6 +79,7 @@ export function ProfileSetupScreen({ onContinue }: ProfileSetupScreenProps) {
   }, []);
 
   const handleContinue = async () => {
+    console.log("HANDLE CONTINUE PRESSED");
     if (!profile.fullName.trim()) {
       showToast('Enter your full name', 'info');
       return;
@@ -118,9 +121,33 @@ export function ProfileSetupScreen({ onContinue }: ProfileSetupScreenProps) {
     });
     await persistProfile();
 
+    try {
+      const userId = profile.email.split("@")[0].trim().toLowerCase();
+      await apiClient.post('/wellness/onboarding', {
+        userId,
+        profile: {
+          fullName: profile.fullName,
+          email: profile.email,
+          username: profile.username,
+          age: profile.age,
+          gender: profile.gender,
+          primaryGoal: goal,
+          activityLevel: activity,
+          wellnessActivities: wellness,
+        },
+      });
+    } catch (err) {
+      console.error('Failed to sync onboarding profile to backend:', err);
+    }
+
     if (onContinue) {
       onContinue(goal);
     } else {
+      await setLoggedIn({
+        method: "email",
+        email: profile.email,
+        displayName: profile.fullName,
+      });
       router.replace('/onboarding-consent');
     }
   };
@@ -197,7 +224,7 @@ export function ProfileSetupScreen({ onContinue }: ProfileSetupScreenProps) {
                           onPress={() => updateProfile({ gender: g })}
                           style={[styles.genderChip, selected && styles.genderChipSelected]}>
                           <Text style={[styles.genderChipText, selected && styles.genderChipTextSelected]}>
-                            {g === 'Prefer not to say' ? 'Other' : g}
+                            {g}
                           </Text>
                         </Pressable>
                       );

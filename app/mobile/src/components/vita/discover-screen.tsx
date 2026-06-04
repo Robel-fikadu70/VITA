@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
+  ActivityIndicator,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -14,7 +15,8 @@ import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BOTTOM_NAV_BAR_HEIGHT } from '@/components/vita/bottom-nav';
-import { DISCOVER_CATEGORIES, filterProviders, type Provider } from '@/constants/providers';
+import { DISCOVER_CATEGORIES, PROVIDERS, type Provider } from '@/constants/providers';
+import { apiClient } from '@/lib/api-client';
 
 const TEXT = '#D8F3DC';
 
@@ -37,13 +39,13 @@ function ProviderCard({ provider, index }: ProviderCardProps) {
         }
         style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
         <LinearGradient
-          colors={[provider.gradientStart, provider.gradientEnd]}
+          colors={[provider.gradientStart || '#0D2B1C', provider.gradientEnd || '#2D6A4F']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.cardImage}>
-          <Text style={styles.cardEmoji}>{provider.emoji}</Text>
-          <View style={[styles.cardTag, { backgroundColor: `${provider.tagColor}25`, borderColor: `${provider.tagColor}50` }]}>
-            <Text style={[styles.cardTagText, { color: provider.tagColor }]}>{provider.tag}</Text>
+          <Text style={styles.cardEmoji}>{provider.emoji || '🧘'}</Text>
+          <View style={[styles.cardTag, { backgroundColor: `${provider.tagColor || '#52B788'}25`, borderColor: `${provider.tagColor || '#52B788'}50` }]}>
+            <Text style={[styles.cardTagText, { color: provider.tagColor || '#52B788' }]}>{provider.tag || 'AI Pick'}</Text>
           </View>
         </LinearGradient>
         <View style={styles.cardBody}>
@@ -51,15 +53,15 @@ function ProviderCard({ provider, index }: ProviderCardProps) {
             {provider.name}
           </Text>
           <Text style={styles.cardType} numberOfLines={1}>
-            {provider.type}
+            {provider.type || 'Wellness Service'}
           </Text>
           <View style={styles.ratingRow}>
             <Ionicons name="star" size={10} color="#D4AF37" />
-            <Text style={styles.ratingText}>{provider.rating}</Text>
-            <Text style={styles.reviewsText}>({provider.reviews})</Text>
+            <Text style={styles.ratingText}>{provider.rating || '4.8'}</Text>
+            <Text style={styles.reviewsText}>({provider.reviews || '100'})</Text>
           </View>
           <View style={styles.cardFooter}>
-            <Text style={styles.priceText}>{provider.price}</Text>
+            <Text style={styles.priceText}>{provider.price || '400 ETB'}</Text>
             <Ionicons name="chevron-forward" size={12} color="rgba(216,243,220,0.35)" />
           </View>
         </View>
@@ -73,11 +75,44 @@ export function DiscoverScreen() {
   const bottomPad = insets.bottom + BOTTOM_NAV_BAR_HEIGHT + 20;
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const [query, setQuery] = useState('');
+  const [providers, setProviders] = useState<Provider[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filtered = useMemo(
-    () => filterProviders(activeCategory, query),
-    [activeCategory, query],
-  );
+  useEffect(() => {
+    const fetchProviders = async () => {
+      try {
+        setLoading(true);
+        const data = await apiClient.get<Provider[]>('/providers');
+        if (Array.isArray(data) && data.length > 0) {
+          setProviders(data);
+        } else {
+          setProviders(PROVIDERS);
+        }
+      } catch (err) {
+        console.error('Failed to fetch providers:', err);
+        setProviders(PROVIDERS);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProviders();
+  }, []);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return providers.filter((p) => {
+      const matchesCategory =
+        activeCategory === 'All' ||
+        (p.categories && p.categories.some(c => c.toLowerCase() === activeCategory.toLowerCase()));
+      const matchesQuery =
+        !q ||
+        p.name.toLowerCase().includes(q) ||
+        (p.type && p.type.toLowerCase().includes(q)) ||
+        (p.location && p.location.toLowerCase().includes(q)) ||
+        (p.tag && p.tag.toLowerCase().includes(q));
+      return matchesCategory && matchesQuery;
+    });
+  }, [providers, activeCategory, query]);
 
   return (
     <LinearGradient colors={['#071A0F', '#1B4332', '#0A200F']} locations={[0, 0.6, 1]} style={styles.root}>
@@ -130,7 +165,9 @@ export function DiscoverScreen() {
         </View>
 
         <View style={styles.grid}>
-          {filtered.length === 0 ? (
+          {loading ? (
+            <ActivityIndicator size="large" color="#52B788" style={{ width: '100%', marginVertical: 40 }} />
+          ) : filtered.length === 0 ? (
             <Text style={styles.empty}>No providers match your search.</Text>
           ) : (
             filtered.map((provider, index) => (

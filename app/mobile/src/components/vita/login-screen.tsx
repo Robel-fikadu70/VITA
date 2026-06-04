@@ -145,7 +145,7 @@ export function LoginScreen() {
             <LinearGradient colors={['#1B4332', '#52B788']} style={styles.logo}>
               <Text style={styles.logoText}>V</Text>
             </LinearGradient>
-            <Text style={styles.brand}>VITAL-ETHIO</Text>
+            <Text style={styles.brand}>VITA</Text>
             <Text style={styles.title}>Welcome back</Text>
             <Text style={styles.subtitle}>Sign in to continue your wellness journey</Text>
           </Animated.View>
