@@ -1,0 +1,34 @@
+{
+  "kpis": {
+    "newReferralsToday": {
+      "value": 12,
+      "change": 12,
+      "trend": "up"
+    },
+    "activeReferrals": {
+      "value": 47,
+      "change": -5,
+      "trend": "down"
+    },
+    "conversionRate": {
+      "value": 68.5,
+      "change": 8.3,
+      "trend": "up"
+    },
+    "revenueGenerated": {
+      "value": 45280,
+      "change": 15.2,
+      "trend": "up"
+    },
+    "completedVisits": {
+      "value": 89,
+      "change": 22.1,
+      "trend": "up"
+    },
+    "campaignReach": {
+      "value": 5234,
+      "change": 18.7,
+      "trend": "up"
+    }
+  }
+}

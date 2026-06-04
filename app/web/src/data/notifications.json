@@ -1,0 +1,46 @@
+[
+  {
+    "id": "NOT-001",
+    "type": "new_referral",
+    "title": "New Referral Received",
+    "message": "Abel Tesfaye was referred for Yoga Recovery Session",
+    "timestamp": "2026-06-02T08:30:00Z",
+    "read": false,
+    "referralId": "REF-001"
+  },
+  {
+    "id": "NOT-002",
+    "type": "booking_update",
+    "title": "Customer Visit Confirmed",
+    "message": "Sarah Kebede confirmed visit for Sleep Recovery Program",
+    "timestamp": "2026-06-01T14:30:00Z",
+    "read": false,
+    "bookingId": "BOOK-001"
+  },
+  {
+    "id": "NOT-003",
+    "type": "high_demand",
+    "title": "High Demand Alert",
+    "message": "Stress management recommendations increased 24% this week",
+    "timestamp": "2026-06-01T09:00:00Z",
+    "read": true
+  },
+  {
+    "id": "NOT-004",
+    "type": "campaign_performance",
+    "title": "Campaign Performance Update",
+    "message": "20% Off Yoga Sessions campaign reached 1,245 views",
+    "timestamp": "2026-05-31T18:00:00Z",
+    "read": true,
+    "campaignId": "CAMP-001"
+  },
+  {
+    "id": "NOT-005",
+    "type": "booking_complete",
+    "title": "Visit Completed",
+    "message": "Daniel Asefa completed Deep Tissue Massage session",
+    "timestamp": "2026-05-31T16:00:00Z",
+    "read": true,
+    "bookingId": "BOOK-002"
+  }
+]

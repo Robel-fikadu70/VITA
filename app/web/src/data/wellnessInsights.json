@@ -1,0 +1,59 @@
+{
+  "demandTrends": [
+    {
+      "category": "Stress",
+      "currentMonth": 245,
+      "previousMonth": 198,
+      "changePercentage": 23.7,
+      "trend": "up"
+    },
+    {
+      "category": "Sleep",
+      "currentMonth": 189,
+      "previousMonth": 167,
+      "changePercentage": 13.2,
+      "trend": "up"
+    },
+    {
+      "category": "Recovery",
+      "currentMonth": 156,
+      "previousMonth": 172,
+      "changePercentage": -9.3,
+      "trend": "down"
+    },
+    {
+      "category": "Nutrition",
+      "currentMonth": 134,
+      "previousMonth": 121,
+      "changePercentage": 10.7,
+      "trend": "up"
+    },
+    {
+      "category": "Fitness",
+      "currentMonth": 278,
+      "previousMonth": 251,
+      "changePercentage": 10.8,
+      "trend": "up"
+    }
+  ],
+  "weeklyTrends": [
+    { "week": "Week 1", "Stress": 45, "Sleep": 32, "Recovery": 28, "Nutrition": 24, "Fitness": 52 },
+    { "week": "Week 2", "Stress": 52, "Sleep": 38, "Recovery": 31, "Nutrition": 28, "Fitness": 58 },
+    { "week": "Week 3", "Stress": 61, "Sleep": 45, "Recovery": 35, "Nutrition": 32, "Fitness": 64 },
+    { "week": "Week 4", "Stress": 87, "Sleep": 74, "Recovery": 62, "Nutrition": 50, "Fitness": 104 }
+  ],
+  "ageDistribution": [
+    { "ageGroup": "18-24", "value": 18 },
+    { "ageGroup": "25-34", "value": 42 },
+    { "ageGroup": "35-44", "value": 24 },
+    { "ageGroup": "45-54", "value": 11 },
+    { "ageGroup": "55+", "value": 5 }
+  ],
+  "topServices": [
+    { "service": "Yoga Sessions", "requests": 187 },
+    { "service": "Personal Training", "requests": 156 },
+    { "service": "Sleep Coaching", "requests": 134 },
+    { "service": "Stress Management", "requests": 121 },
+    { "service": "Nutrition Plans", "requests": 98 }
+  ]
+}
