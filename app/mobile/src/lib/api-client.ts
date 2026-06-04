@@ -5,16 +5,23 @@ type RequestOptions = {
   headers?: Record<string, string>;
   params?: Record<string, string>;
 };
-
 /**
  * Resolves a unique, stable userId from the current session.
  * Fallback to 'anonymous_user' if not logged in.
  */
 export async function getActiveUserId(): Promise<string> {
   const session = await getAuthSession();
-  if (!session) return 'anonymous_user';
-  // Use email with special characters replaced to serve as a clean Firestore ID
-  return session.email.replace(/[^a-zA-Z0-9_.-]/g, '_');
+
+  if (!session?.email) {
+    throw new Error(
+      'No authenticated session found. User must login first.'
+    );
+  }
+
+  return session.email
+    .split('@')[0]
+    .trim()
+    .toLowerCase();
 }
 
 /**
@@ -27,17 +34,46 @@ async function request<T>(
   options?: RequestOptions
 ): Promise<T> {
   // Construct the absolute URL
-  const pathClean = path.startsWith('/') ? path : `/${path}`;
-  const url = new URL(`${API_BASE_URL}${pathClean}`);
+  // const pathClean = path.startsWith('/') ? path : `/${path}`;
+  // const url = new URL(`${API_BASE_URL}${pathClean}`);
 
-  // Append query params if present
+  // // Append query params if present
+  // if (options?.params) {
+  //   Object.entries(options.params).forEach(([key, val]) => {
+  //     url.searchParams.append(key, val);
+  //   });
+  // }
+
+  // // Construct request headers
+  // const headers = new Headers({
+  //   'Content-Type': 'application/json',
+  //   ...options?.headers,
+  // });
+
+  // const config: RequestInit = {
+  //   method,
+  //   headers,
+  // };
+
+  // if (body) {
+  //   config.body = JSON.stringify(body);
+  // }
+  // console.log("API CLIENT LOADED");
+  // console.log("API_BASE_URL =", API_BASE_URL);
+  const pathClean = path.startsWith('/') ? path : `/${path}`;
+
+  // 1. AVOID 'new URL()'. Use string concatenation.
+  let url = `${API_BASE_URL}${pathClean}`;
+
+  // 2. Append query params manually if they exist
   if (options?.params) {
-    Object.entries(options.params).forEach(([key, val]) => {
-      url.searchParams.append(key, val);
-    });
+    const query = new URLSearchParams(options.params).toString();
+    url += `?${query}`;
   }
 
-  // Construct request headers
+  // DEBUG LOG: This will show you EXACTLY what is being called
+  // console.log(`[apiClient] Sending ${method} to: ${url}`);
+
   const headers = new Headers({
     'Content-Type': 'application/json',
     ...options?.headers,
@@ -46,11 +82,8 @@ async function request<T>(
   const config: RequestInit = {
     method,
     headers,
+    body: body ? JSON.stringify(body) : undefined,
   };
-
-  if (body) {
-    config.body = JSON.stringify(body);
-  }
 
   try {
     const response = await fetch(url.toString(), config);
@@ -82,10 +115,10 @@ async function request<T>(
  * Reusable apiClient helpers for REST calls.
  */
 export const apiClient = {
-  get: <T>(path: string, options?: RequestOptions) =>
+  get: <T>(path: any, options?: RequestOptions) =>
     request<T>(path, 'GET', undefined, options),
 
-  post: <T>(path: string, body?: any, options?: RequestOptions) =>
+  post: <T>(path: any, body?: any, options?: RequestOptions) =>
     request<T>(path, 'POST', body, options),
 
   put: <T>(path: string, body?: any, options?: RequestOptions) =>

@@ -38,4 +38,10 @@ export class PulseController {
     const doc = await db.collection('wellness_reports').doc(userId).get();
     return doc.exists ? doc.data() : { message: 'Please complete onboarding.' };
   }
+
+  // 4. Wellness Chat
+  @Post('chat')
+  async wellnessChat(@Body() body: { userId: string; message: string }) {
+    return await this.ai.askWellnessQuestion(body.userId, body.message);
+  }
 }

@@ -22,6 +22,7 @@ import {
   PROVIDER_SERVICES,
   type Provider,
 } from '@/constants/providers';
+import { apiClient, getActiveUserId } from '@/lib/api-client';
 
 const TEXT = '#D8F3DC';
 const GREEN = '#52B788';
@@ -97,10 +98,24 @@ export function BookingScreen({ provider, time, serviceName }: BookingScreenProp
     setPaying(method);
     const label = method === 'telebirr' ? 'Telebirr' : 'Chapa';
     showToast(`Processing ${label} payment…`, 'info');
-    setTimeout(() => {
-      setPaying(null);
-      showToast('Booking confirmed! Your wellness passport is ready.', 'success');
-      router.replace('/(tabs)');
+    setTimeout(async () => {
+      try {
+        const userId = await getActiveUserId();
+        await apiClient.post('/book', {
+          userId,
+          serviceId: service.name,
+          partnerId: provider.id,
+          price: pricing.total,
+        });
+        setPaying(null);
+        showToast('Booking confirmed! Your wellness passport is ready.', 'success');
+        router.replace('/(tabs)');
+      } catch (err) {
+        console.error('Booking creation failed:', err);
+        setPaying(null);
+        showToast('Payment successful, but server failed to log booking.', 'info');
+        router.replace('/(tabs)');
+      }
     }, 1800);
   };
 

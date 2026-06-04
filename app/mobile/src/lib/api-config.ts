@@ -9,7 +9,7 @@ const DEFAULT_PORT = 3000;
  */
 const getLocalBaseUrl = (): string => {
   if (Platform.OS === 'android') {
-    return `http://10.0.2.2:${DEFAULT_PORT}`;
+    return `http://192.168.1.4:${DEFAULT_PORT}`;
   }
   return `http://localhost:${DEFAULT_PORT}`;
 };
