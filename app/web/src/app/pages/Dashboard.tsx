@@ -12,6 +12,7 @@ interface DashboardProps {
 export function Dashboard({ onNavigate }: DashboardProps) {
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadAnalytics();
@@ -19,18 +20,47 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
   const loadAnalytics = async () => {
     setLoading(true);
+    setError(null);
     try {
       const data = await analyticsService.getAnalytics();
       setAnalytics(data);
+    } catch (err: any) {
+      console.error('Dashboard Load Error:', err);
+      setError(err.message || 'Failed to connect to VITAL-ETHIO Backend. Please ensure your backend is running and the API URL is correct.');
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading || !analytics) {
+  if (loading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="animate-spin w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full"></div>
+      <div className="flex items-center justify-center h-full min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-gray-500 animate-pulse">Syncing wellness data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !analytics) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[400px] p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full shadow-xl border border-red-100 dark:border-red-900/20 text-center">
+          <div className="w-16 h-16 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <span className="text-3xl">⚠️</span>
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Connection Issue</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
+            {error || 'We couldn\'t load your partner dashboard. Please verify your connection to the VITAL-ETHIO analytics engine.'}
+          </p>
+          <button
+            onClick={loadAnalytics}
+            className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold transition-all shadow-lg shadow-emerald-500/20"
+          >
+            Retry Connection
+          </button>
+        </div>
       </div>
     );
   }

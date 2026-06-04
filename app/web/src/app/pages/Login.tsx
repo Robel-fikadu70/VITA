@@ -1,9 +1,10 @@
-import { useState } from 'react';
-import { Eye, EyeOff, LogIn } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Eye, EyeOff, LogIn, UserCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { partnerService, Partner } from '../../services/partnerService';
 
 interface LoginProps {
-  onLogin: () => void;
+  onLogin: (partnerId?: string) => void;
 }
 
 export function Login({ onLogin }: LoginProps) {
@@ -11,6 +12,24 @@ export function Login({ onLogin }: LoginProps) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [partners, setPartners] = useState<Partner[]>([]);
+  const [fetchingPartners, setFetchingPartners] = useState(true);
+
+  useEffect(() => {
+    loadPartners();
+  }, []);
+
+  const loadPartners = async () => {
+    setFetchingPartners(true);
+    try {
+      const data = await partnerService.getPartners();
+      setPartners(data);
+    } catch (error) {
+      console.error('Failed to load partners for demo', error);
+    } finally {
+      setFetchingPartners(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +51,11 @@ export function Login({ onLogin }: LoginProps) {
       }
       setLoading(false);
     }, 1000);
+  };
+
+  const handleDemoLogin = (partnerId: string) => {
+    toast.success('Logging in as demo partner...');
+    onLogin(partnerId);
   };
 
   return (
@@ -82,8 +106,8 @@ export function Login({ onLogin }: LoginProps) {
       </div>
 
       {/* Right Side - Login Form */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
+      <div className="flex-1 flex items-center justify-center p-8 overflow-y-auto">
+        <div className="w-full max-w-md py-8">
           <div className="lg:hidden mb-8 text-center">
             <div className="inline-flex items-center gap-2 mb-4">
               <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
@@ -185,9 +209,47 @@ export function Login({ onLogin }: LoginProps) {
               </button>
             </form>
 
-            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-              <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-                Demo credentials: any email + password (6+ characters)
+            <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-700">
+              <div className="flex items-center gap-2 mb-4">
+                <UserCircle2 className="w-5 h-5 text-emerald-600" />
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">
+                  Continue as Demo Partner
+                </h3>
+              </div>
+              
+              <div className="grid grid-cols-1 gap-2">
+                {fetchingPartners ? (
+                  <div className="flex items-center justify-center py-4">
+                    <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                ) : (
+                  partners.map((partner) => (
+                    <button
+                      key={partner.id}
+                      onClick={() => handleDemoLogin(partner.id)}
+                      className="flex items-center justify-between w-full p-3 bg-gray-50 dark:bg-gray-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 border border-gray-200 dark:border-gray-600 rounded-xl transition-all group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl">{partner.emoji}</span>
+                        <div className="text-left">
+                          <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-emerald-600 transition-colors">
+                            {partner.name}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            {partner.type}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="w-8 h-8 rounded-full bg-white dark:bg-gray-600 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm">
+                        <LogIn className="w-4 h-4 text-emerald-600" />
+                      </div>
+                    </button>
+                  ))
+                )}
+              </div>
+              
+              <p className="text-center text-[10px] text-gray-400 dark:text-gray-500 mt-4 italic">
+                Using real-time data from seeded VITAL-ETHIO partners
               </p>
             </div>
           </div>

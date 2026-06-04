@@ -1,5 +1,7 @@
-// TODO: Replace with GET /api/referrals
-import referralsData from '../data/referrals.json';
+import { partnerService } from './partnerService';
+
+const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const API_URL = (import.meta as any).env.VITE_PUBLIC_API_URL || (isLocal ? 'http://localhost:3000' : 'https://vita-7riw.onrender.com');
 
 export type ReferralStatus = 'New' | 'Booked' | 'Visited' | 'Cancelled';
 
@@ -24,45 +26,49 @@ export interface Referral {
 
 export const referralService = {
   async getAll(): Promise<Referral[]> {
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(referralsData as Referral[]), 300);
-    });
+    const partnerId = partnerService.getCurrentPartnerId();
+    if (!partnerId) throw new Error('No partner selected');
+
+    try {
+      const response = await fetch(`${API_URL}/partner/referrals/${partnerId}`);
+      if (!response.ok) throw new Error('Failed to fetch referrals');
+      return await response.json();
+    } catch (error) {
+      console.error('Error in referralService.getAll:', error);
+      throw error;
+    }
   },
 
   async getById(id: string): Promise<Referral | null> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const referral = referralsData.find((r) => r.id === id);
-        resolve(referral ? (referral as Referral) : null);
-      }, 200);
-    });
+    const referrals = await this.getAll();
+    return referrals.find((r) => r.id === id) || null;
   },
 
-  async updateStatus(id: string, status: ReferralStatus): Promise<Referral> {
-    // TODO: Replace with PATCH /api/referrals/:id
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const referral = referralsData.find((r) => r.id === id);
-        if (referral) {
-          const updated = { ...referral, status } as Referral;
-          resolve(updated);
-        }
-      }, 300);
-    });
+  async updateStatus(id: string, status: ReferralStatus): Promise<any> {
+    try {
+      const response = await fetch(`${API_URL}/partner/referrals/${id}/status`, {
+        method: 'POST', // Changed to POST as per backend implementation
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status }),
+      });
+      if (!response.ok) throw new Error('Failed to update status');
+      return await response.json();
+    } catch (error) {
+      console.error('Error in referralService.updateStatus:', error);
+      throw error;
+    }
   },
 
   async search(query: string): Promise<Referral[]> {
-    // TODO: Replace with GET /api/referrals/search?q=:query
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const results = referralsData.filter(
-          (r) =>
-            r.customerName.toLowerCase().includes(query.toLowerCase()) ||
-            r.recommendedService.toLowerCase().includes(query.toLowerCase()) ||
-            r.id.toLowerCase().includes(query.toLowerCase())
-        );
-        resolve(results as Referral[]);
-      }, 200);
-    });
+    const referrals = await this.getAll();
+    const q = query.toLowerCase();
+    return referrals.filter(
+      (r) =>
+        r.customerName.toLowerCase().includes(q) ||
+        r.recommendedService.toLowerCase().includes(q) ||
+        r.id.toLowerCase().includes(q)
+    );
   },
 };

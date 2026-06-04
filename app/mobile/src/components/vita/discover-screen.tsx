@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BOTTOM_NAV_BAR_HEIGHT } from '@/components/vita/bottom-nav';
 import { DISCOVER_CATEGORIES, PROVIDERS, type Provider } from '@/constants/providers';
+import { useProviders } from '@/context/provider-context';
 import { apiClient } from '@/lib/api-client';
 
 const TEXT = '#D8F3DC';
@@ -75,8 +76,8 @@ export function DiscoverScreen() {
   const bottomPad = insets.bottom + BOTTOM_NAV_BAR_HEIGHT + 20;
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const [query, setQuery] = useState('');
-  const [providers, setProviders] = useState<Provider[]>([]);
   const [loading, setLoading] = useState(true);
+  const { providers, setProviders } = useProviders();
 
   useEffect(() => {
     const fetchProviders = async () => {
@@ -85,18 +86,15 @@ export function DiscoverScreen() {
         const data = await apiClient.get<Provider[]>('/providers');
         if (Array.isArray(data) && data.length > 0) {
           setProviders(data);
-        } else {
-          setProviders(PROVIDERS);
         }
       } catch (err) {
         console.error('Failed to fetch providers:', err);
-        setProviders(PROVIDERS);
       } finally {
         setLoading(false);
       }
     };
     fetchProviders();
-  }, []);
+  }, [setProviders]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();

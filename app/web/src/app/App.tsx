@@ -45,14 +45,18 @@ export default function App() {
     }
   };
 
-  const handleLogin = () => {
+  const handleLogin = (partnerId?: string) => {
     setIsAuthenticated(true);
     localStorage.setItem('vital-ethio-auth', 'true');
+    if (partnerId) {
+      localStorage.setItem('vital-ethio-partner-id', partnerId);
+    }
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
     localStorage.removeItem('vital-ethio-auth');
+    localStorage.removeItem('vital-ethio-partner-id');
     setCurrentPage('dashboard');
   };
 

@@ -1,7 +1,8 @@
 import { Redirect, useLocalSearchParams } from 'expo-router';
 
 import { BookingScreen } from '@/components/vita/booking-screen';
-import { getProviderById, PROVIDERS, PROVIDER_SERVICES } from '@/constants/providers';
+import { useProviders } from '@/context/provider-context';
+import { PROVIDERS, PROVIDER_SERVICES } from '@/constants/providers';
 
 export default function BookingRoute() {
   const { id, time, service } = useLocalSearchParams<{
@@ -10,6 +11,7 @@ export default function BookingRoute() {
     service?: string;
   }>();
 
+  const { getProviderById } = useProviders();
   const provider = (id && getProviderById(id)) || PROVIDERS[0];
   const serviceName =
     service && PROVIDER_SERVICES.some((s) => s.name === service)
