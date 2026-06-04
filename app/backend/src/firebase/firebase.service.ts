@@ -41,6 +41,6 @@ export class FirebaseService implements OnModuleInit {
   }
 
   getFirestore() {
-    return this.db;
+    return this.db; 
   }
 }
