@@ -18,10 +18,14 @@ export default function TabLayout() {
         }}>
         <Tabs.Screen name="index" options={{ title: 'Home' }} />
         <Tabs.Screen name="discover" options={{ title: 'Discover' }} />
-        <Tabs.Screen name="womens-wellness" options={{ title: "Women's Wellness" }} />
+        <Tabs.Screen name="screenings" options={{ title: 'Screenings' }} />
         <Tabs.Screen name="ai" options={{ title: 'Vita AI' }} />
         <Tabs.Screen name="history" options={{ title: 'History' }} />
         <Tabs.Screen name="settings" options={{ title: 'Settings' }} />
+        {/* Hidden routes — not shown in tab bar */}
+        <Tabs.Screen name="womens-wellness" options={{ href: null }} />
+        <Tabs.Screen name="assessment" options={{ href: null }} />
+        <Tabs.Screen name="screening-results" options={{ href: null }} />
         <Tabs.Screen name="consent" options={{ href: null }} />
         <Tabs.Screen name="notifications" options={{ href: null }} />
         <Tabs.Screen name="provider" options={{ href: null }} />

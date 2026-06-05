@@ -16,6 +16,7 @@ export default function RootLayout() {
             <Stack.Screen name="login" options={{ animation: 'fade' }} />
             <Stack.Screen name="profile-setup" options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="onboarding-consent" options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="onboarding-womens" options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
           </Stack>
         </ToastProvider>
