@@ -203,7 +203,7 @@ export function SplashScreen({ onNext }: SplashScreenProps) {
           <Animated.View
             entering={FadeInDown.delay(400).springify().damping(26).stiffness(260)}
             style={styles.textBlock}>
-            <Text style={styles.title}>VITAL-ETHIO</Text>
+            <Text style={styles.title}>VITA</Text>
             <Animated.Text entering={FadeIn.delay(800)} style={styles.tagline}>
               The Bridge From Data{'\n'}To Discovery
             </Animated.Text>

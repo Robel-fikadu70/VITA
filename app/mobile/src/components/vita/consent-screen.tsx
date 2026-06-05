@@ -163,7 +163,7 @@ export function ConsentScreen({ variant = 'settings' }: ConsentScreenProps) {
           </View>
           <Text style={styles.title}>Build Your Wellness{'\n'}Profile</Text>
           <Text style={styles.subtitle}>
-            To provide personalized wellness recommendations, VITAL-ETHIO requires access to
+            To provide personalized wellness recommendations, VITA requires access to
             selected health and lifestyle information.
           </Text>
         </Animated.View>

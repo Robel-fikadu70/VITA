@@ -41,7 +41,7 @@ export function PrescriptionDetailScreen() {
             <Ionicons name="arrow-back" size={18} color="rgba(216,243,220,0.7)" />
           </Pressable>
           <View style={styles.headerCopy}>
-            <Text style={styles.brand}>VITAL-ETHIO AI</Text>
+            <Text style={styles.brand}>VITA AI</Text>
             <Text style={styles.headerTitle}>Prescription Details</Text>
           </View>
           <View style={styles.activeBadge}>

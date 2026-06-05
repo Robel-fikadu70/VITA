@@ -171,7 +171,7 @@ export function SettingsScreen() {
             <Ionicons name="log-out-outline" size={17} color="#FF6B6B" />
             <Text style={styles.logoutText}>Logout</Text>
           </Pressable>
-          <Text style={styles.footer}>VITAL-ETHIO v1.0 · © 2026 Addis Ababa, Ethiopia</Text>
+          <Text style={styles.footer}>VITA v1.0 · © 2026 Addis Ababa, Ethiopia</Text>
         </Animated.View>
       </ScrollView>
     </LinearGradient>

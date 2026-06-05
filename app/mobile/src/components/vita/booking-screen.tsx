@@ -132,7 +132,7 @@ export function BookingScreen({ provider, time, serviceName }: BookingScreenProp
             <Ionicons name="arrow-back" size={18} color="rgba(216,243,220,0.7)" />
           </Pressable>
           <View>
-            <Text style={styles.brand}>VITAL-ETHIO</Text>
+            <Text style={styles.brand}>VITA</Text>
             <Text style={styles.headerTitle}>Booking Screen</Text>
           </View>
         </Animated.View>
