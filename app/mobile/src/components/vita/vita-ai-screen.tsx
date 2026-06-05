@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -11,20 +11,14 @@ import {
   View,
 } from 'react-native';
 import Animated, {
-  Easing,
   FadeIn,
   FadeInDown,
   FadeInUp,
-  FadeOut,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withSequence,
-  withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BOTTOM_NAV_BAR_HEIGHT } from '@/components/vita/bottom-nav';
+import { LoadingOrb, LoadingSteps } from '@/components/vita/loading-orb';
 import { MeshGradientBackground } from '@/components/vita/mesh-gradient-background';
 import { apiClient, getActiveUserId } from '@/lib/api-client';
 
@@ -48,77 +42,19 @@ const LOADING_STEPS = [
   'Generating recommendations...',
 ];
 
-function LoadingOrb() {
-  const scale = useSharedValue(1);
-  const rotation = useSharedValue(0);
-
-  useEffect(() => {
-    scale.value = withRepeat(
-      withSequence(
-        withTiming(1.2, { duration: 1000, easing: Easing.inOut(Easing.ease) }),
-        withTiming(1, { duration: 1000, easing: Easing.inOut(Easing.ease) }),
-      ),
-      -1,
-      false,
-    );
-    rotation.value = withRepeat(
-      withTiming(360, { duration: 2000, easing: Easing.linear }),
-      -1,
-      false,
-    );
-  }, [rotation, scale]);
-
-  const orbStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }, { rotate: `${rotation.value}deg` }],
-  }));
-
-  return (
-    <Animated.View style={[styles.loadingOrb, orbStyle]}>
-      <View style={styles.loadingOrbInner} />
-    </Animated.View>
-  );
-}
-
 export function VitaAiScreen() {
   const insets = useSafeAreaInsets();
   const bottomPad = insets.bottom + BOTTOM_NAV_BAR_HEIGHT + 16;
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<string | null>(null);
-  const [currentStep, setCurrentStep] = useState(0);
-
-  const clearTimers = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
-  }, []);
-
-  useEffect(() => clearTimers, [clearTimers]);
 
   const handleSubmit = useCallback(async () => {
     if (!query.trim() || isLoading) return;
 
-    clearTimers();
     setIsLoading(true);
     setResponse(null);
-    setCurrentStep(0);
-
-    // Animate loader steps
-    let step = 0;
-    intervalRef.current = setInterval(() => {
-      step += 1;
-      if (step < LOADING_STEPS.length) {
-        setCurrentStep(step);
-      }
-    }, 700);
 
     try {
       const userId = await getActiveUserId();
@@ -126,16 +62,14 @@ export function VitaAiScreen() {
         userId,
         message: query.trim(),
       });
-      clearTimers();
       setIsLoading(false);
       setResponse(res.response || 'Sorry, I couldn\'t process that question.');
     } catch (err) {
       console.error('AI chat failed:', err);
-      clearTimers();
       setIsLoading(false);
       setResponse('Failed to connect to VITA server. Please check your backend connection.');
     }
-  }, [clearTimers, isLoading, query]);
+  }, [isLoading, query]);
 
   const showExamples = !isLoading && !response;
 
@@ -178,14 +112,7 @@ export function VitaAiScreen() {
             {isLoading ? (
               <Animated.View entering={FadeIn.duration(300)} style={styles.loadingBlock}>
                 <LoadingOrb />
-                <Animated.View
-                  key={currentStep}
-                  entering={FadeInUp.duration(250)}
-                  exiting={FadeOut.duration(200)}>
-                  <Text style={styles.loadingStep}>
-                    {LOADING_STEPS[currentStep] ?? LOADING_STEPS[LOADING_STEPS.length - 1]}
-                  </Text>
-                </Animated.View>
+                <LoadingSteps steps={LOADING_STEPS} intervalMs={700} />
               </Animated.View>
             ) : null}
 
@@ -274,32 +201,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 32,
     paddingVertical: 24,
-  },
-  loadingOrb: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    overflow: 'hidden',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  loadingOrbInner: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: ACCENT,
-    opacity: 0.85,
-    shadowColor: ACCENT,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 30,
-    elevation: 12,
-  },
-  loadingStep: {
-    color: TEXT_SOFT,
-    fontSize: 15,
-    textAlign: 'center',
-    paddingHorizontal: 16,
   },
   responseCard: {
     backgroundColor: 'rgba(255,255,255,0.72)',
