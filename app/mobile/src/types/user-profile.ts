@@ -10,6 +10,15 @@ export type UserProfile = {
   primaryGoal: string;
   activityLevel: string;
   wellnessActivities: string[];
+  // New wellness profile fields
+  occupation: string;
+  averageSleepDuration: string;
+  dailyScreenTime: string;
+  stressLevel: string;
+  daysExercisedPerWeek: string;
+  biggestWellnessChallenge: string;
+  existingWellnessHabits: string[];
+  wellnessGoals: string[];
 };
 
 export const EMPTY_PROFILE: UserProfile = {
@@ -22,4 +31,13 @@ export const EMPTY_PROFILE: UserProfile = {
   primaryGoal: '',
   activityLevel: '',
   wellnessActivities: [],
+  // New wellness profile defaults
+  occupation: '',
+  averageSleepDuration: '',
+  dailyScreenTime: '',
+  stressLevel: '',
+  daysExercisedPerWeek: '',
+  biggestWellnessChallenge: '',
+  existingWellnessHabits: [],
+  wellnessGoals: [],
 };
