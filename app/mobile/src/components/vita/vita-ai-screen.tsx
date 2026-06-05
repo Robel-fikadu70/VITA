@@ -133,7 +133,7 @@ export function VitaAiScreen() {
       console.error('AI chat failed:', err);
       clearTimers();
       setIsLoading(false);
-      setResponse('Failed to connect to VITAL-ETHIO server. Please check your backend connection.');
+      setResponse('Failed to connect to VITA server. Please check your backend connection.');
     }
   }, [clearTimers, isLoading, query]);
 

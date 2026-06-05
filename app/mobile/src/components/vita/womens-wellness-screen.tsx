@@ -109,7 +109,7 @@ export function WomensWellnessScreen() {
         <Animated.View entering={FadeIn.delay(750)} style={styles.disclaimer}>
           <Ionicons name="alert-circle-outline" size={16} color="#F4A261" style={styles.disclaimerIcon} />
           <Text style={styles.disclaimerText}>
-            VITAL-ETHIO never diagnoses conditions. If your responses indicate patterns commonly
+            VITA never diagnoses conditions. If your responses indicate patterns commonly
             associated with hormonal imbalance, we will suggest consulting a healthcare professional.
           </Text>
         </Animated.View>
