@@ -47,6 +47,15 @@ const TABS: TabConfig[] = [
     pillBg: 'rgba(78,205,196,0.2)',
   },
   {
+    routeName: 'activities',
+    id: 'Activities',
+    label: 'Activities',
+    icon: 'leaf-outline',
+    iconFocused: 'leaf',
+    activeColor: '#52B788',
+    pillBg: 'rgba(82,183,136,0.2)',
+  },
+  {
     routeName: 'ai',
     id: 'AI',
     label: 'Vita AI',

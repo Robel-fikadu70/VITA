@@ -114,7 +114,7 @@ export function Login({ onLogin }: LoginProps) {
                 <span className="text-xl font-bold text-white">VE</span>
               </div>
               <div className="text-left">
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">VITAL-ETHIO</h1>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white">VITA</h1>
                 <p className="text-xs text-gray-600 dark:text-gray-400">Partner Portal</p>
               </div>
             </div>

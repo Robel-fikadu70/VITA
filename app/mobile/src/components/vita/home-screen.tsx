@@ -3,7 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import Animated, { FadeIn, FadeInDown, FadeInLeft } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown, FadeInLeft, useSharedValue, useAnimatedStyle, withSpring, withTiming, interpolateColor } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BOTTOM_NAV_BAR_HEIGHT } from '@/components/vita/bottom-nav';
@@ -40,6 +40,54 @@ const formatPrice = (val: any): string => {
   const s = String(val);
   return s.toUpperCase().includes('ETB') ? s : `${s} ETB`;
 };
+
+function CheckItem({ item, index, isLast, isChecked, onToggle }: { item: any, index: number, isLast: boolean, isChecked: boolean, onToggle: () => void }) {
+  const scale = useSharedValue(1);
+  const checkScale = useSharedValue(isChecked ? 1 : 0);
+  const opacity = useSharedValue(isChecked ? 0.6 : 1);
+
+  useEffect(() => {
+    checkScale.value = withSpring(isChecked ? 1 : 0, { stiffness: 400, damping: 25 });
+    opacity.value = withTiming(isChecked ? 0.6 : 1, { duration: 250 });
+  }, [isChecked]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+    opacity: opacity.value,
+  }));
+
+  const checkAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: checkScale.value }, { rotate: `${(1 - checkScale.value) * 45}deg` }],
+    opacity: checkScale.value,
+  }));
+
+  const handlePressIn = () => { scale.value = withSpring(0.97, { stiffness: 500, damping: 30 }); };
+  const handlePressOut = () => { scale.value = withSpring(1, { stiffness: 500, damping: 30 }); };
+
+  return (
+    <Animated.View
+      entering={FadeInLeft.delay(450 + index * 80).duration(300)}
+      style={[styles.protocolRow, !isLast && styles.protocolRowGap, animatedStyle]}>
+      <View style={[styles.protocolIcon, { backgroundColor: `${item.color}18`, borderColor: `${item.color}30` }]}>
+        <Ionicons name={item.icon} size={18} color={item.color} />
+      </View>
+      <Text style={[styles.protocolText, isChecked && styles.protocolTextChecked]}>
+        {item.text}
+      </Text>
+      <Pressable
+        accessibilityRole="checkbox"
+        accessibilityState={{ checked: isChecked }}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        onPress={onToggle}
+        style={[styles.checkBox, isChecked && styles.checkBoxChecked]}>
+        <Animated.View style={checkAnimatedStyle}>
+          <Ionicons name="checkmark" size={14} color={GREEN} />
+        </Animated.View>
+      </Pressable>
+    </Animated.View>
+  );
+}
 
 export function HomeScreen() {
   const insets = useSafeAreaInsets();
@@ -260,30 +308,16 @@ export function HomeScreen() {
             {loading ? (
               <ActivityIndicator color={GREEN} style={{ marginVertical: 12 }} />
             ) : (
-              protocols.map((item: any, index: number) => {
-                const isChecked = !!checked[item.id];
-                return (
-                  <Animated.View
-                    key={item.id}
-                    entering={FadeInLeft.delay(450 + index * 80).duration(300)}
-                    style={[styles.protocolRow, index < protocols.length - 1 && styles.protocolRowGap]}>
-                    <View style={[styles.protocolIcon, { backgroundColor: `${item.color}18`, borderColor: `${item.color}30` }]}>
-                      <Ionicons name={item.icon} size={18} color={item.color} />
-                    </View>
-                    <Text style={styles.protocolText}>{item.text}</Text>
-                    <Pressable
-                      accessibilityRole="checkbox"
-                      accessibilityState={{ checked: isChecked }}
-                      onPress={() => toggleProtocol(item.id)}
-                      style={[
-                        styles.checkBox,
-                        isChecked && styles.checkBoxChecked,
-                      ]}>
-                      {isChecked ? <Ionicons name="checkmark" size={12} color={GREEN} /> : null}
-                    </Pressable>
-                  </Animated.View>
-                );
-              })
+              protocols.map((item: any, index: number) => (
+                <CheckItem
+                  key={item.id}
+                  item={item}
+                  index={index}
+                  isLast={index === protocols.length - 1}
+                  isChecked={!!checked[item.id]}
+                  onToggle={() => toggleProtocol(item.id)}
+                />
+              ))
             )}
           </Animated.View>
 
@@ -466,6 +500,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   protocolText: { flex: 1, color: TEXT, fontSize: 14, fontWeight: '600' },
+  protocolTextChecked: { textDecorationLine: 'line-through', color: TEXT_MUTED },
   checkBox: {
     width: 22,
     height: 22,
