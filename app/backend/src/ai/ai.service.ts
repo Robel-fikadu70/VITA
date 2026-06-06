@@ -70,4 +70,39 @@ export class AiService {
       return { error: 'AI logic failed', details: e };
     }
   }
+
+  async askWellnessQuestion(userId: string, message: string): Promise<{ response: string }> {
+    const model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const db = this.firebase.getFirestore();
+
+    let contextStr = 'Context: Wellness App "VITAL-ETHIO".';
+    try {
+      const userDoc = await db.collection('users').doc(userId).get();
+      const reportDoc = await db.collection('wellness_reports').doc(userId).get();
+
+      if (userDoc.exists) {
+        contextStr += ` User Profile: ${JSON.stringify(userDoc.data())}.`;
+      }
+      if (reportDoc.exists) {
+        contextStr += ` Latest Wellness Report: ${JSON.stringify(reportDoc.data())}.`;
+      }
+    } catch (e) {
+      console.error('Error fetching user context for chat:', e);
+    }
+
+    const prompt = `
+      ${contextStr}
+      The user is asking: "${message}"
+      Please provide a concise, friendly, and helpful wellness response.
+      Keep it short (2-4 sentences) and highly relevant to their recovery and wellbeing. Do not diagnose diseases.
+    `;
+
+    try {
+      const result = await model.generateContent(prompt);
+      const rawText = result.response.text();
+      return { response: rawText.trim() };
+    } catch (e) {
+      return { response: 'Sorry, I failed to process your request. Please try again later.' };
+    }
+  }
 }

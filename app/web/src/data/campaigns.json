@@ -1,0 +1,162 @@
+[
+  {
+    "id": "CAMP-001",
+    "name": "20% Off Yoga Sessions",
+    "description": "Special discount on all yoga recovery sessions for new VITAL-ETHIO referrals",
+    "discountPercentage": 20,
+    "serviceCategory": "Yoga",
+    "startDate": "2026-06-01T00:00:00Z",
+    "endDate": "2026-06-30T23:59:59Z",
+    "status": "Active",
+    "metrics": {
+      "views": 1245,
+      "clicks": 342,
+      "bookings": 67,
+      "conversionRate": 19.6
+    }
+  },
+  {
+    "id": "CAMP-002",
+    "name": "15% Off Spa Recovery",
+    "description": "Relaxation and recovery treatments at a special rate",
+    "discountPercentage": 15,
+    "serviceCategory": "Spa",
+    "startDate": "2026-05-15T00:00:00Z",
+    "endDate": "2026-06-15T23:59:59Z",
+    "status": "Active",
+    "metrics": {
+      "views": 892,
+      "clicks": 203,
+      "bookings": 41,
+      "conversionRate": 20.2
+    }
+  },
+  {
+    "id": "CAMP-003",
+    "name": "Meditation Weekend Program",
+    "description": "Weekend mindfulness and meditation retreat special",
+    "discountPercentage": 25,
+    "serviceCategory": "Wellness Coaching",
+    "startDate": "2026-06-10T00:00:00Z",
+    "endDate": "2026-07-10T23:59:59Z",
+    "status": "Active",
+    "metrics": {
+      "views": 567,
+      "clicks": 145,
+      "bookings": 23,
+      "conversionRate": 15.9
+    }
+  },
+  {
+    "id": "CAMP-004",
+    "name": "Sleep Recovery Package",
+    "description": "Comprehensive sleep improvement program with coaching and therapy",
+    "discountPercentage": 30,
+    "serviceCategory": "Wellness Coaching",
+    "startDate": "2026-05-20T00:00:00Z",
+    "endDate": "2026-06-20T23:59:59Z",
+    "status": "Active",
+    "metrics": {
+      "views": 1034,
+      "clicks": 289,
+      "bookings": 52,
+      "conversionRate": 18.0
+    }
+  },
+  {
+    "id": "CAMP-005",
+    "name": "Summer Fitness Challenge",
+    "description": "8-week transformation program with personal training",
+    "discountPercentage": 20,
+    "serviceCategory": "Gym",
+    "startDate": "2026-06-01T00:00:00Z",
+    "endDate": "2026-07-31T23:59:59Z",
+    "status": "Active",
+    "metrics": {
+      "views": 1678,
+      "clicks": 456,
+      "bookings": 89,
+      "conversionRate": 19.5
+    }
+  },
+  {
+    "id": "CAMP-006",
+    "name": "Nutrition Starter Pack",
+    "description": "Get started with personalized nutrition planning at a special rate",
+    "discountPercentage": 35,
+    "serviceCategory": "Nutrition",
+    "startDate": "2026-06-05T00:00:00Z",
+    "endDate": "2026-07-05T23:59:59Z",
+    "status": "Active",
+    "metrics": {
+      "views": 734,
+      "clicks": 198,
+      "bookings": 38,
+      "conversionRate": 19.2
+    }
+  },
+  {
+    "id": "CAMP-007",
+    "name": "Morning Yoga Series",
+    "description": "Early bird special for morning yoga classes",
+    "discountPercentage": 25,
+    "serviceCategory": "Yoga",
+    "startDate": "2026-05-01T00:00:00Z",
+    "endDate": "2026-05-31T23:59:59Z",
+    "status": "Ended",
+    "metrics": {
+      "views": 956,
+      "clicks": 234,
+      "bookings": 45,
+      "conversionRate": 19.2
+    }
+  },
+  {
+    "id": "CAMP-008",
+    "name": "Stress Relief Bundle",
+    "description": "Combination of massage therapy and mindfulness coaching",
+    "discountPercentage": 40,
+    "serviceCategory": "Spa",
+    "startDate": "2026-06-01T00:00:00Z",
+    "endDate": "2026-06-30T23:59:59Z",
+    "status": "Paused",
+    "metrics": {
+      "views": 445,
+      "clicks": 112,
+      "bookings": 19,
+      "conversionRate": 17.0
+    }
+  },
+  {
+    "id": "CAMP-009",
+    "name": "Athletic Recovery Week",
+    "description": "Special rates for athletes and fitness enthusiasts",
+    "discountPercentage": 30,
+    "serviceCategory": "Gym",
+    "startDate": "2026-06-15T00:00:00Z",
+    "endDate": "2026-06-22T23:59:59Z",
+    "status": "Active",
+    "metrics": {
+      "views": 823,
+      "clicks": 267,
+      "bookings": 54,
+      "conversionRate": 20.2
+    }
+  },
+  {
+    "id": "CAMP-010",
+    "name": "Wellness Starter Bundle",
+    "description": "Complete wellness package including coaching, yoga, and nutrition",
+    "discountPercentage": 45,
+    "serviceCategory": "Wellness Coaching",
+    "startDate": "2026-06-01T00:00:00Z",
+    "endDate": "2026-08-31T23:59:59Z",
+    "status": "Active",
+    "metrics": {
+      "views": 1567,
+      "clicks": 423,
+      "bookings": 78,
+      "conversionRate": 18.4
+    }
+  }
+]
