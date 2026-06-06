@@ -14,6 +14,7 @@ export function Login({ onLogin }: LoginProps) {
   const [loading, setLoading] = useState(false);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [fetchingPartners, setFetchingPartners] = useState(true);
+  const [singlePartner, setSinglePartner] = useState<Partner | null>(null);
 
   useEffect(() => {
     loadPartners();
@@ -24,6 +25,7 @@ export function Login({ onLogin }: LoginProps) {
     try {
       const data = await partnerService.getPartners();
       setPartners(data);
+      setSinglePartner(data[3]);
     } catch (error) {
       console.error('Failed to load partners for demo', error);
     } finally {
@@ -223,7 +225,7 @@ export function Login({ onLogin }: LoginProps) {
                     <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
                   </div>
                 ) : (
-                  partners.map((partner) => (
+                  partners.slice(-1).map((partner) => (
                     <button
                       key={partner.id}
                       onClick={() => handleDemoLogin(partner.id)}
