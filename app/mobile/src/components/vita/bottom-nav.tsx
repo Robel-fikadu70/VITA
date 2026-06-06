@@ -38,13 +38,22 @@ const TABS: TabConfig[] = [
     iconFocused: 'compass',
   },
   {
-    routeName: 'womens-wellness',
-    id: 'Wellness',
-    label: "Women's",
-    icon: 'heart-outline',
-    iconFocused: 'heart',
-    activeColor: '#C9607A',
-    pillBg: 'rgba(250,210,225,0.2)',
+    routeName: 'screenings',
+    id: 'Screenings',
+    label: 'Screenings',
+    icon: 'clipboard-outline',
+    iconFocused: 'clipboard',
+    activeColor: '#4ECDC4',
+    pillBg: 'rgba(78,205,196,0.2)',
+  },
+  {
+    routeName: 'activities',
+    id: 'Activities',
+    label: 'Activities',
+    icon: 'leaf-outline',
+    iconFocused: 'leaf',
+    activeColor: '#52B788',
+    pillBg: 'rgba(82,183,136,0.2)',
   },
   {
     routeName: 'ai',
@@ -77,6 +86,8 @@ const HIDDEN_TAB_ROUTES = new Set([
   'rx-details',
   'consent',
   'daily-report',
+  'assessment',
+  'screening-results',
 ]);
 
 const HIDDEN_TAB_PARENT: Record<string, string> = {
@@ -86,6 +97,8 @@ const HIDDEN_TAB_PARENT: Record<string, string> = {
   booking: 'Home',
   notifications: 'Home',
   'rx-details': 'History',
+  assessment: 'Screenings',
+  'screening-results': 'Screenings',
 };
 
 type TabButtonProps = {

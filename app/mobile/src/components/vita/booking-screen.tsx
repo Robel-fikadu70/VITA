@@ -23,6 +23,7 @@ import {
   type Provider,
 } from '@/constants/providers';
 import { apiClient, getActiveUserId } from '@/lib/api-client';
+import { MOCK_ACTIVITIES } from '@/lib/mock-activities';
 
 const TEXT = '#D8F3DC';
 const GREEN = '#52B788';
@@ -33,6 +34,8 @@ export type BookingScreenProps = {
   provider: Provider;
   time: string;
   serviceName?: string;
+  activityId?: string;
+  packageIdx?: string;
 };
 
 function parseEtb(value: string): number {
@@ -74,11 +77,14 @@ function SpinningPhone({ active }: { active: boolean }) {
   );
 }
 
-export function BookingScreen({ provider, time, serviceName }: BookingScreenProps) {
+export function BookingScreen({ provider, time, serviceName, activityId, packageIdx }: BookingScreenProps) {
   const insets = useSafeAreaInsets();
   const { showToast } = useToast();
   const bottomPad = insets.bottom + BOTTOM_NAV_BAR_HEIGHT + 24;
   const [paying, setPaying] = useState<PaymentMethod | null>(null);
+
+  const activity = useMemo(() => MOCK_ACTIVITIES.find(a => a.id === activityId), [activityId]);
+  const pkg = activity && packageIdx ? activity.packages[parseInt(packageIdx, 10)] : null;
 
   const service = useMemo(
     () => PROVIDER_SERVICES.find((s) => s.name === serviceName) ?? PROVIDER_SERVICES[0],
@@ -86,12 +92,20 @@ export function BookingScreen({ provider, time, serviceName }: BookingScreenProp
   );
 
   const pricing = useMemo(() => {
+    if (activity && pkg) {
+      const original = parseEtb(pkg.price);
+      // Let's pretend there's a small discount for booking via Vita
+      const savings = Math.floor(original * 0.1); 
+      const total = original - savings;
+      return { original, total, savings, discountPercent: 10 };
+    }
+
     const original = parseEtb(service.price);
     const total = parseEtb(service.discount);
     const discountPercent = parseDiscountPercent(provider.discountLabel);
     const savings = original - total;
     return { original, total, savings, discountPercent };
-  }, [provider.discountLabel, service]);
+  }, [provider.discountLabel, service, activity, pkg]);
 
   const handlePay = (method: PaymentMethod) => {
     if (paying) return;
@@ -103,8 +117,8 @@ export function BookingScreen({ provider, time, serviceName }: BookingScreenProp
         const userId = await getActiveUserId();
         await apiClient.post('/book', {
           userId,
-          serviceId: service.name,
-          partnerId: provider.id,
+          serviceId: activity ? activity.id : service.name,
+          partnerId: activity ? activity.location : provider.id,
           price: pricing.total,
         });
         setPaying(null);
@@ -139,12 +153,12 @@ export function BookingScreen({ provider, time, serviceName }: BookingScreenProp
 
         <Animated.View entering={FadeInUp.delay(100).springify()} style={styles.summaryCard}>
           <View style={styles.summaryTop}>
-            <LinearGradient colors={['#1B4332', '#52B788']} style={styles.summaryThumb}>
-              <Text style={styles.summaryEmoji}>{provider.emoji}</Text>
+            <LinearGradient colors={activity ? activity.gradientColors : ['#1B4332', '#52B788']} style={styles.summaryThumb}>
+              <Text style={styles.summaryEmoji}>{activity ? activity.emoji : provider.emoji}</Text>
             </LinearGradient>
             <View style={styles.summaryCopy}>
-              <Text style={styles.providerLabel}>{provider.name}</Text>
-              <Text style={styles.serviceName}>{service.name}</Text>
+              <Text style={styles.providerLabel}>{activity ? activity.location : provider.name}</Text>
+              <Text style={styles.serviceName}>{activity ? `${activity.title} (${pkg?.name})` : service.name}</Text>
               <View style={styles.metaRow}>
                 <View style={styles.metaItem}>
                   <Ionicons name="calendar-outline" size={11} color="rgba(216,243,220,0.4)" />
@@ -161,7 +175,7 @@ export function BookingScreen({ provider, time, serviceName }: BookingScreenProp
           <View style={styles.priceBreakdown}>
             <View style={styles.priceRow}>
               <Text style={styles.priceLabel}>Service price</Text>
-              <Text style={styles.priceStrikethrough}>{service.price}</Text>
+              <Text style={styles.priceStrikethrough}>{pricing.original} ETB</Text>
             </View>
             <View style={styles.priceRow}>
               <View style={styles.discountLabelRow}>
@@ -174,14 +188,19 @@ export function BookingScreen({ provider, time, serviceName }: BookingScreenProp
             </View>
             <View style={styles.totalRow}>
               <Text style={styles.totalLabel}>Total</Text>
-              <Text style={styles.totalValue}>{service.discount}</Text>
+              <Text style={styles.totalValue}>{pricing.total} ETB</Text>
             </View>
           </View>
         </Animated.View>
 
         <Animated.View entering={FadeIn.delay(250)} style={styles.includedCard}>
           <Text style={styles.includedTitle}>What&apos;s Included</Text>
-          {BOOKING_INCLUDED.map((item) => (
+          {activity ? activity.inclusions.map((item) => (
+            <View key={item} style={styles.includedRow}>
+              <Ionicons name="checkmark" size={13} color={GREEN} />
+              <Text style={styles.includedText}>{item}</Text>
+            </View>
+          )) : BOOKING_INCLUDED.map((item) => (
             <View key={item} style={styles.includedRow}>
               <Ionicons name="checkmark" size={13} color={GREEN} />
               <Text style={styles.includedText}>{item}</Text>

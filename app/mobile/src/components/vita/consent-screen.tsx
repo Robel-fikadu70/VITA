@@ -119,8 +119,9 @@ export function ConsentScreen({ variant = 'settings' }: ConsentScreenProps) {
       });
     }
     await completeOnboarding();
-    if (profile?.primaryGoal === "Women's Wellness") {
-      router.replace('/(tabs)/womens-wellness');
+    // Female users get an optional Women's Wellness screening prompt
+    if (profile?.gender === 'Female') {
+      router.replace('/onboarding-womens');
     } else {
       router.replace('/(tabs)');
     }

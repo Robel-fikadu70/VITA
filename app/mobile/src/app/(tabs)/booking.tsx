@@ -5,10 +5,12 @@ import { useProviders } from '@/context/provider-context';
 import { PROVIDERS, PROVIDER_SERVICES } from '@/constants/providers';
 
 export default function BookingRoute() {
-  const { id, time, service } = useLocalSearchParams<{
+  const { id, time, service, activityId, packageIdx } = useLocalSearchParams<{
     id?: string;
     time?: string;
     service?: string;
+    activityId?: string;
+    packageIdx?: string;
   }>();
 
   const { getProviderById } = useProviders();
@@ -18,7 +20,7 @@ export default function BookingRoute() {
       ? service
       : PROVIDER_SERVICES[0].name;
 
-  if (!provider) {
+  if (!provider && !activityId) {
     return <Redirect href="/(tabs)/discover" />;
   }
 
@@ -27,6 +29,8 @@ export default function BookingRoute() {
       provider={provider}
       time={time ?? '5:00 PM'}
       serviceName={serviceName}
+      activityId={activityId}
+      packageIdx={packageIdx}
     />
   );
 }
